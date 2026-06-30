@@ -25,6 +25,8 @@ class usuario(AbstractBaseUser):
     telefono=models.CharField(max_length=20)
     id_rol=models.ForeignKey(rol,on_delete=models.SET_NULL,null=True)
     activo=models.BooleanField(default=True)
+    intentos_fallidos=models.IntegerField(default=0)
+    bloqueado_hasta=models.DateTimeField(null=True,blank=True)
     
     objects=usuariomanager()
     
@@ -33,9 +35,9 @@ class usuario(AbstractBaseUser):
 
 class pacientes(models.Model):
     id_paciente=models.OneToOneField(usuario,on_delete=cascade,primary_key=True,db_column='id_usuario')
-    fecha_nacimiento=models.DateField()
-    sexo=models.CharField(max_length=1)
-    eps=models.CharField(max_length=100)
+    fecha_nacimiento=models.DateField(null=True,blank=True)
+    sexo=models.CharField(max_length=1,null=True,blank=True)
+    eps=models.CharField(max_length=100,blank=True,default='')
     alergias=models.TextField(blank=True,null=True)
     
 class medicos(models.Model):
@@ -88,3 +90,27 @@ class auditoria_citas(models.Model):
     evento=models.CharField(max_length=100)
     id_usuario_actor=models.ForeignKey(usuario,on_delete=models.SET_NULL,null=True)
     fecha_evento=models.DateTimeField(auto_now_add=True)
+
+class tokens_recuperacion(models.Model):
+    id_token=models.AutoField(primary_key=True)
+    id_usuario=models.ForeignKey(usuario,on_delete=cascade)
+    token=models.CharField(max_length=255,unique=True)
+    expira_en=models.DateTimeField()
+    usado=models.BooleanField(default=False)
+
+class historial_clinico(models.Model):
+    id_historial=models.AutoField(primary_key=True)
+    id_paciente=models.ForeignKey(pacientes,on_delete=cascade)
+    id_medico=models.ForeignKey(medicos,on_delete=cascade)
+    fecha=models.DateField()
+    diagnostico=models.TextField()
+    tratamiento=models.TextField(blank=True,null=True)
+    notas=models.TextField(blank=True,null=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+
+class notificaciones(models.Model):
+    id_notificacion=models.AutoField(primary_key=True)
+    id_usuario=models.ForeignKey(usuario,on_delete=cascade)
+    mensaje=models.TextField()
+    leida=models.BooleanField(default=False)
+    created_at=models.DateTimeField(auto_now_add=True)

@@ -1,0 +1,22 @@
+[
+  {"model": "citas.rol", "pk": 1, "fields": {"nombre": "admin"}},
+  {"model": "citas.rol", "pk": 2, "fields": {"nombre": "medico"}},
+  {"model": "citas.rol", "pk": 3, "fields": {"nombre": "paciente"}},
+
+  {"model": "citas.estados_cita", "pk": 1, "fields": {"nombre": "pendiente"}},
+  {"model": "citas.estados_cita", "pk": 2, "fields": {"nombre": "confirmada"}},
+  {"model": "citas.estados_cita", "pk": 3, "fields": {"nombre": "realizada"}},
+  {"model": "citas.estados_cita", "pk": 4, "fields": {"nombre": "cancelada"}},
+  {"model": "citas.estados_cita", "pk": 5, "fields": {"nombre": "no_asistio"}},
+
+  {"model": "citas.especialidades", "pk": 1, "fields": {"nombre": "Cardiología"}},
+  {"model": "citas.especialidades", "pk": 2, "fields": {"nombre": "Dermatología"}},
+  {"model": "citas.especialidades", "pk": 3, "fields": {"nombre": "Pediatría"}},
+  {"model": "citas.especialidades", "pk": 4, "fields": {"nombre": "Neurología"}},
+  {"model": "citas.especialidades", "pk": 5, "fields": {"nombre": "Ortopedia"}},
+  {"model": "citas.especialidades", "pk": 6, "fields": {"nombre": "Ginecología"}},
+  {"model": "citas.especialidades", "pk": 7, "fields": {"nombre": "Oftalmología"}},
+  {"model": "citas.especialidades", "pk": 8, "fields": {"nombre": "Psiquiatría"}},
+  {"model": "citas.especialidades", "pk": 9, "fields": {"nombre": "Medicina General"}},
+  {"model": "citas.especialidades", "pk": 10, "fields": {"nombre": "Odontología"}}
+]

@@ -1,0 +1,2452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediCita — Gestión de Citas Médicas</title>
+<meta name="description" content="Sistema profesional de gestión de citas médicas online. Agenda, consulta y cancela tus citas con especialistas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --primary:        #003A70;
+  --primary-dark:   #00274D;
+  --primary-deep:   #00142A;
+  --primary-light:  #E6F0FA;
+  --primary-glow:   rgba(0,58,112,.18);
+  --accent:         #FFC107;
+  --accent-light:   #e0f9ff;
+  --success:        #10b981;
+  --success-light:  #d1fae5;
+  --warning:        #f59e0b;
+  --warning-light:  #fef3c7;
+  --danger:         #ef4444;
+  --danger-light:   #fee2e2;
+  --muted:          #94a3b8;
+  --bg:             #f0f4ff;
+  --surface:        #ffffff;
+  --border:         #e2e8f0;
+  --text:           #0f172a;
+  --text-muted:     #64748b;
+  --sidebar-w:      260px;
+  --navbar-h:       64px;
+  --radius-sm:      8px;
+  --radius-md:      14px;
+  --radius-lg:      20px;
+  --shadow-sm:      0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:      0 4px 16px rgba(26,108,246,.10), 0 2px 6px rgba(0,0,0,.06);
+  --shadow-lg:      0 10px 40px rgba(26,108,246,.15), 0 4px 12px rgba(0,0,0,.08);
+  --transition:     .2s cubic-bezier(.4,0,.2,1);
+}
+
+[data-theme="dark"] {
+  --bg:             #0b1120;
+  --surface:        #111827;
+  --text:           #f1f5f9;
+  --text-muted:     #94a3b8;
+  --border:         #334155;
+  --primary-glow:   rgba(26,108,246,.3);
+  --shadow-sm:      0 1px 3px rgba(0,0,0,.2), 0 1px 2px rgba(0,0,0,.15);
+  --shadow-md:      0 4px 16px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.2);
+  --shadow-lg:      0 10px 40px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.3);
+}
+
+/* ═══════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding-top: var(--navbar-h);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c7d3ef; border-radius: 10px; }
+
+/* ═══════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════ */
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--navbar-h);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 60%, var(--primary-deep) 100%);
+  box-shadow: 0 2px 20px var(--primary-glow);
+  z-index: 1030;
+  display: flex;
+  align-items: center;
+  padding: 0 1.25rem;
+  gap: 1rem;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  text-decoration: none;
+  color: #fff !important;
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -.5px;
+  flex-shrink: 0;
+}
+
+.navbar-brand .brand-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,.18);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  animation: heartbeat 2.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.15); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.1); }
+  70% { transform: scale(1); }
+}
+
+.navbar-brand .brand-sub {
+  font-size: .65rem;
+  font-weight: 400;
+  opacity: .75;
+  display: block;
+  line-height: 1;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.navbar-spacer { flex: 1; }
+
+#navUser {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.nav-chip {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 50px;
+  padding: .3rem .75rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .78rem;
+  color: rgba(255,255,255,.9);
+  backdrop-filter: blur(8px);
+}
+
+.nav-chip i { opacity: .7; }
+
+.nav-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,255,255,.3), rgba(255,255,255,.1));
+  border: 2px solid rgba(255,255,255,.35);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-size: .9rem;
+  color: #fff;
+  cursor: pointer;
+  transition: transform var(--transition), border-color var(--transition);
+  flex-shrink: 0;
+}
+
+.nav-avatar:hover { transform: scale(1.06); border-color: rgba(255,255,255,.6); }
+
+.btn-logout {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: .35rem .8rem;
+  font-size: .78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition);
+  display: flex; align-items: center; gap: .4rem;
+}
+
+.btn-logout:hover { background: rgba(255,255,255,.22); }
+
+.btn-sidebar-toggle {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: .4rem .6rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background var(--transition);
+  display: none;
+}
+
+.btn-sidebar-toggle:hover { background: rgba(255,255,255,.22); }
+
+@media (max-width: 768px) { .btn-sidebar-toggle { display: flex; align-items: center; } }
+
+/* ═══════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════ */
+.sidebar {
+  position: fixed;
+  top: var(--navbar-h);
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 1020;
+  transition: transform var(--transition);
+  overflow: hidden;
+}
+
+.sidebar-user {
+  background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+  padding: 1.25rem 1.25rem 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-user::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+}
+
+.sidebar-user::after {
+  content: '';
+  position: absolute;
+  bottom: -20px; left: -20px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+}
+
+.sidebar-avatar {
+  width: 50px; height: 50px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.2);
+  border: 2px solid rgba(255,255,255,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: .75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-user-name {
+  font-weight: 700;
+  font-size: .9rem;
+  color: #fff;
+  position: relative; z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-role {
+  font-size: .72rem;
+  color: rgba(255,255,255,.7);
+  position: relative; z-index: 1;
+  text-transform: capitalize;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: .75rem 0;
+}
+
+.sidebar-section-label {
+  padding: .5rem 1.25rem .25rem;
+  font-size: .65rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .7rem 1.25rem;
+  color: var(--text-muted);
+  font-size: .88rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: all var(--transition);
+  position: relative;
+  cursor: pointer;
+}
+
+.sidebar-link i {
+  font-size: 1rem;
+  width: 1.25rem;
+  text-align: center;
+  flex-shrink: 0;
+  transition: color var(--transition);
+}
+
+.sidebar-link:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-left-color: var(--primary);
+}
+
+.sidebar-link:hover i { color: var(--primary); }
+
+.sidebar-link.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+  border-left-color: var(--primary);
+}
+
+.sidebar-link.active i { color: var(--primary); }
+
+.sidebar-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: .75rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.show { transform: translateX(0); box-shadow: var(--shadow-lg); }
+}
+
+/* ═══════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════ */
+.main-content {
+  margin-left: var(--sidebar-w);
+  padding: 1.75rem;
+  min-height: calc(100vh - var(--navbar-h));
+  transition: margin var(--transition);
+}
+
+@media (max-width: 768px) {
+  .main-content { margin-left: 0; padding: 1rem; }
+}
+
+.section-page { display: none; }
+.section-page.active { display: block; animation: fadeIn .25s ease; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   PAGE HEADER
+═══════════════════════════════════════════ */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+.page-title i {
+  color: var(--primary);
+  font-size: 1.2rem;
+}
+
+/* ═══════════════════════════════════════════
+   STATS GRID
+═══════════════════════════════════════════ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.stat-card.blue::before   { background: linear-gradient(90deg, var(--primary), var(--accent)); }
+.stat-card.cyan::before   { background: linear-gradient(90deg, var(--accent), #06d6a0); }
+.stat-card.green::before  { background: linear-gradient(90deg, var(--success), #34d399); }
+.stat-card.red::before    { background: linear-gradient(90deg, var(--danger), #f97316); }
+.stat-card.orange::before { background: linear-gradient(90deg, var(--warning), #fbbf24); }
+
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+.stat-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.stat-icon.blue   { background: var(--primary-light); color: var(--primary); }
+.stat-icon.cyan   { background: var(--accent-light);  color: var(--accent); }
+.stat-icon.green  { background: var(--success-light); color: var(--success); }
+.stat-icon.red    { background: var(--danger-light);  color: var(--danger); }
+.stat-icon.orange { background: var(--warning-light); color: var(--warning); }
+
+.stat-info { flex: 1; min-width: 0; }
+.stat-number { font-size: 1.8rem; font-weight: 800; color: var(--text); line-height: 1; }
+.stat-label  { font-size: .78rem; color: var(--text-muted); margin-top: .2rem; font-weight: 500; }
+
+/* ═══════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════ */
+.card-panel {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.card-panel-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.card-panel-title {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0;
+}
+
+.card-panel-title i { color: var(--primary); }
+
+.card-panel-body { padding: 1.25rem; }
+
+/* Cita cards */
+.cita-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: .75rem;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+
+.cita-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: #c7d7fd; }
+
+.cita-card:last-child { margin-bottom: 0; }
+
+.cita-time-block {
+  text-align: center;
+  min-width: 58px;
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  padding: .4rem .5rem;
+  flex-shrink: 0;
+}
+
+.cita-time-block .time { font-size: 1.1rem; font-weight: 800; color: var(--primary); line-height: 1; }
+.cita-time-block .date { font-size: .65rem; color: var(--text-muted); margin-top: .2rem; }
+
+.cita-info { flex: 1; min-width: 0; }
+.cita-medico { font-weight: 700; font-size: .9rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cita-detail { font-size: .78rem; color: var(--text-muted); margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ═══════════════════════════════════════════
+   BADGES / ESTADOS
+═══════════════════════════════════════════ */
+.badge-estado {
+  font-size: .72rem;
+  font-weight: 600;
+  padding: .3em .7em;
+  border-radius: 50px;
+  letter-spacing: .2px;
+  white-space: nowrap;
+}
+
+.bg-pendiente   { background: var(--warning-light) !important; color: #92400e !important; }
+.bg-confirmada  { background: var(--primary-light) !important; color: var(--primary-dark) !important; }
+.bg-realizada   { background: var(--success-light) !important; color: #065f46 !important; }
+.bg-cancelada   { background: var(--danger-light)  !important; color: #991b1b !important; }
+.bg-no_asistio  { background: #f1f5f9 !important; color: #475569 !important; }
+
+/* ═══════════════════════════════════════════
+   AUTH PAGE
+═══════════════════════════════════════════ */
+.auth-page {
+  display: flex;
+  min-height: calc(100vh - var(--navbar-h));
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  position: relative;
+}
+
+.auth-bg-pattern {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(26,108,246,.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(6,182,212,.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(14,63,163,.08) 0%, transparent 50%),
+    var(--bg);
+  z-index: -1;
+}
+
+/* Floating medical icons in bg */
+.auth-bg-icons {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.auth-bg-icons span {
+  position: absolute;
+  font-size: 2rem;
+  opacity: .04;
+  color: var(--primary);
+  animation: floatIcon 8s ease-in-out infinite;
+}
+
+.auth-bg-icons span:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; }
+.auth-bg-icons span:nth-child(2) { top: 60%; left: 5%;  animation-delay: 1s; font-size: 1.5rem; }
+.auth-bg-icons span:nth-child(3) { top: 30%; right: 8%; animation-delay: 2s; }
+.auth-bg-icons span:nth-child(4) { top: 70%; right: 12%; animation-delay: 1.5s; font-size: 1.5rem; }
+.auth-bg-icons span:nth-child(5) { bottom: 20%; left: 15%; animation-delay: .5s; font-size: 2.5rem; }
+.auth-bg-icons span:nth-child(6) { top: 10%; left: 50%; animation-delay: 3s; font-size: 1.2rem; }
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%       { transform: translateY(-20px) rotate(5deg); }
+}
+
+.auth-card {
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(26,108,246,.08);
+  width: 100%;
+  max-width: 430px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  animation: slideUp .4s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.auth-header {
+  background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+  padding: 2rem 2rem 1.75rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-header::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+}
+
+.auth-header::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: -30px;
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+}
+
+.auth-icon {
+  width: 64px; height: 64px;
+  background: rgba(255,255,255,.18);
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  color: #fff;
+  margin: 0 auto 1rem;
+  position: relative; z-index: 1;
+  animation: heartbeat 2.5s ease-in-out infinite;
+}
+
+.auth-header h3 {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.35rem;
+  margin-bottom: .3rem;
+  position: relative; z-index: 1;
+}
+
+.auth-header p {
+  color: rgba(255,255,255,.75);
+  font-size: .85rem;
+  margin: 0;
+  position: relative; z-index: 1;
+}
+
+.auth-body { padding: 1.75rem; }
+
+.auth-footer {
+  padding: 1rem 1.75rem;
+  background: #f8faff;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: .82rem;
+  color: var(--text-muted);
+}
+
+.auth-footer a {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity var(--transition);
+}
+
+.auth-footer a:hover { opacity: .75; text-decoration: underline; }
+
+/* ═══════════════════════════════════════════
+   FORMS
+═══════════════════════════════════════════ */
+.form-label {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: .35rem;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.form-control, .form-select {
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  padding: .55rem .85rem;
+  font-size: .9rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  background: var(--surface);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+  outline: none;
+}
+
+.form-control::placeholder { color: var(--muted); }
+
+.form-text { font-size: .75rem; color: var(--text-muted); margin-top: .3rem; }
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: .52rem 1.2rem;
+  font-size: .875rem;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(26,108,246,.30);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-deep));
+  box-shadow: 0 4px 18px rgba(26,108,246,.40);
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+.btn-outline-primary {
+  background: transparent;
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.btn-outline-secondary {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+}
+
+.btn-outline-secondary:hover { background: #f8faff; color: var(--text); }
+
+.btn-outline-danger {
+  background: transparent;
+  border: 1.5px solid var(--danger);
+  color: var(--danger);
+}
+
+.btn-outline-danger:hover { background: var(--danger-light); }
+
+.btn-outline-success {
+  background: transparent;
+  border: 1.5px solid var(--success);
+  color: var(--success);
+}
+
+.btn-outline-success:hover { background: var(--success-light); }
+
+.btn-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(16,185,129,.25);
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger), #dc2626);
+  color: #fff;
+}
+
+.btn-danger:hover { background: linear-gradient(135deg, #dc2626, #b91c1c); color: #fff; }
+
+.btn-sm { padding: .32rem .75rem; font-size: .8rem; border-radius: 6px; }
+
+.btn:disabled { opacity: .55; pointer-events: none; }
+
+/* ═══════════════════════════════════════════
+   TABLES
+═══════════════════════════════════════════ */
+.table-wrapper {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.table {
+  font-size: .85rem;
+  margin: 0;
+}
+
+.table thead th {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-weight: 700;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  border: none;
+  padding: .85rem 1rem;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  vertical-align: middle;
+  padding: .75rem 1rem;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.table tbody tr { transition: background var(--transition); }
+.table-hover tbody tr:hover { background: #f5f8ff; }
+
+/* ═══════════════════════════════════════════
+   ALERTS & TOASTS
+═══════════════════════════════════════════ */
+.alert {
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: .85rem;
+  padding: .75rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: .5rem;
+}
+
+.alert-danger  { background: var(--danger-light);  color: #991b1b; }
+.alert-success { background: var(--success-light); color: #065f46; }
+.alert-info    { background: var(--primary-light); color: var(--primary-dark); }
+.alert-warning { background: var(--warning-light); color: #92400e; }
+
+.toast-container { position: fixed; top: 76px; right: 1rem; z-index: 9999; }
+
+.toast {
+  border: none;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md);
+  min-width: 300px;
+  background: var(--surface);
+}
+
+.toast .toast-body {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .85rem 1rem;
+  font-size: .85rem;
+  font-weight: 500;
+}
+
+.toast-success .toast-body { background: var(--success-light); color: #065f46; border-radius: var(--radius-md); }
+.toast-error   .toast-body { background: var(--danger-light);  color: #991b1b; border-radius: var(--radius-md); }
+.toast-warning .toast-body { background: var(--warning-light); color: #92400e; border-radius: var(--radius-md); }
+.toast-info    .toast-body { background: var(--primary-light); color: var(--primary-dark); border-radius: var(--radius-md); }
+
+/* ═══════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════ */
+.modal-content {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+  background: var(--surface);
+}
+
+.modal-title { font-weight: 700; font-size: 1rem; color: var(--text); }
+.modal-body  { padding: 1.5rem; }
+.modal-footer { border-top: 1px solid var(--border); padding: 1rem 1.5rem; }
+
+/* ═══════════════════════════════════════════
+   WIZARD (Agendar Cita)
+═══════════════════════════════════════════ */
+.wizard-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2rem;
+  padding: 1rem 0 .5rem;
+}
+
+.wizard-step-item {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.wizard-step-btn {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: var(--muted);
+  font-size: .8rem;
+  font-weight: 500;
+  cursor: default;
+}
+
+.wizard-step-btn .step-number {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface);
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.wizard-step-btn.active .step-number {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 0 0 4px var(--primary-glow);
+}
+
+.wizard-step-btn.active { color: var(--primary); font-weight: 700; }
+
+.wizard-step-btn.completed .step-number {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.wizard-step-btn.completed { color: var(--success); }
+
+.wizard-connector {
+  width: 40px; height: 2px;
+  background: var(--border);
+  margin: 0 .25rem;
+  border-radius: 1px;
+  transition: background var(--transition);
+}
+
+.wizard-connector.done { background: var(--success); }
+
+.wizard-step { display: none; }
+.wizard-step.active { display: block; animation: fadeIn .2s ease; }
+
+/* Slot buttons */
+.slot-btn {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: .85rem .75rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--surface);
+  user-select: none;
+}
+
+.slot-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.slot-btn.selected {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(26,108,246,.35);
+  transform: translateY(-2px);
+}
+
+.slot-btn .time { font-weight: 700; font-size: .92rem; }
+.slot-btn .ampm { font-size: .68rem; color: var(--text-muted); margin-top: .15rem; }
+.slot-btn.selected .ampm { color: rgba(255,255,255,.75); }
+
+/* Doctor card in wizard */
+.doctor-card {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: .9rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--surface);
+}
+
+.doctor-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.doctor-avatar {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.doctor-name  { font-weight: 700; font-size: .9rem; color: var(--text); }
+.doctor-info  { font-size: .76rem; color: var(--text-muted); margin-top: .1rem; }
+
+/* Especialidad cards */
+.esp-card {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem .75rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--surface);
+}
+
+.esp-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.esp-card i { font-size: 1.5rem; color: var(--primary); display: block; margin-bottom: .5rem; }
+.esp-card span { font-size: .82rem; font-weight: 600; color: var(--text); }
+
+/* Confirm summary card */
+.confirm-row {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  padding: .85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.confirm-row:last-child { border-bottom: none; }
+
+.confirm-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .95rem;
+  flex-shrink: 0;
+}
+
+.confirm-label { font-size: .73rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+.confirm-value { font-size: .9rem; font-weight: 700; color: var(--text); }
+
+/* ═══════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════ */
+.empty-state {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  background: var(--primary-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  color: var(--primary);
+  opacity: .6;
+  margin: 0 auto 1rem;
+}
+
+.empty-state p { font-size: .9rem; margin: 0; }
+
+/* ═══════════════════════════════════════════
+   INPUT GROUP
+═══════════════════════════════════════════ */
+.input-group .form-control { border-right: none; }
+.input-group .btn { border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important; }
+
+/* ═══════════════════════════════════════════
+   MISC UTILITIES
+═══════════════════════════════════════════ */
+.spinner-border { color: var(--primary) !important; }
+
+.text-primary { color: var(--primary) !important; }
+.text-muted   { color: var(--text-muted) !important; }
+.fw-600 { font-weight: 600; }
+.fw-700 { font-weight: 700; }
+.fw-800 { font-weight: 800; }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin: 1rem 0;
+  color: var(--muted);
+  font-size: .78rem;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Role pill in admin table */
+.role-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: .25em .65em;
+  border-radius: 50px;
+}
+
+.role-pill.admin   { background: #ede9fe; color: #6d28d9; }
+.role-pill.medico  { background: var(--accent-light); color: #0e7490; }
+.role-pill.paciente { background: var(--primary-light); color: var(--primary-dark); }
+
+/* Loading overlay */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  flex-direction: column;
+  gap: 1rem;
+  color: var(--text-muted);
+  font-size: .85rem;
+}
+
+/* Overlay for mobile sidebar */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.45);
+  z-index: 1019;
+  backdrop-filter: blur(2px);
+}
+
+.sidebar-overlay.show { display: block; }
+
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .wizard-connector { width: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <button class="btn-sidebar-toggle" id="sidebarToggle">
+    <i class="bi bi-list"></i>
+  </button>
+
+  <a class="navbar-brand" href="#" onclick="showLanding()">
+    <div class="brand-icon"><i class="bi bi-hospital"></i></div>
+    <div>
+      Portal HUN
+      <span class="brand-sub">Agenda tu cita</span>
+    </div>
+  </a>
+
+  <div class="navbar-spacer"></div>
+
+  <!-- Nav user area -->
+  <div id="navUser" class="d-none" style="display:none !important">
+    <button class="btn-logout me-2" id="themeToggleBtn" onclick="toggleTheme()" title="Cambiar tema">
+      <i class="bi bi-moon"></i>
+    </button>
+    <div class="nav-chip d-none d-md-flex" id="navRoleChip">
+      <i class="bi bi-person-badge"></i>
+      <span id="navRole"></span>
+    </div>
+    <div class="nav-avatar" id="navAvatar" title="Mi perfil">U</div>
+    <span class="d-none d-md-block" id="navName" style="color:rgba(255,255,255,.9);font-weight:600;font-size:.85rem"></span>
+    <button class="btn-logout" onclick="logout()">
+      <i class="bi bi-box-arrow-right"></i>
+      <span class="d-none d-md-inline">Salir</span>
+    </button>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <!-- User header -->
+  <div class="sidebar-user" id="sidebarUserHeader">
+    <div class="sidebar-avatar" id="sidebarAvatarLg">U</div>
+    <div class="sidebar-user-name" id="sidebarUserName">Cargando...</div>
+    <div class="sidebar-user-role" id="sidebarUserRole">—</div>
+  </div>
+
+  <!-- Nav links -->
+  <div class="sidebar-nav">
+    <div class="sidebar-section-label">Navegación</div>
+    <div id="sidebarLinks"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <i class="bi bi-shield-check text-primary me-1"></i>
+    MediCita v1.0 · Seguro
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content" id="mainContent">
+
+  <!-- LANDING PAGE -->
+  <div class="section-page active" id="landingPage" style="padding: 3rem 1.5rem; max-width: 900px; margin: 0 auto; animation: fadeIn 0.4s ease;">
+    <div class="text-center mb-5">
+      <div class="mb-4">
+        <i class="bi bi-hospital" style="font-size: 4rem; color: var(--primary);"></i>
+      </div>
+      <h1 class="fw-800 mb-3" style="color: var(--primary-dark); font-size: 2.2rem;">Agenda tu cita o procedimiento</h1>
+      <p class="text-muted mb-4 mx-auto" style="max-width: 650px; font-size: 1.05rem; line-height: 1.6;">
+        Bienvenido al Portal de Gestión de Citas Médicas. A través de este canal, podrás solicitar, consultar y cancelar tus citas médicas y procedimientos con nuestros especialistas de forma rápida y segura.
+      </p>
+      <button class="btn btn-primary btn-lg" onclick="showLogin()" style="font-size: 1.1rem; padding: 0.8rem 2.5rem; border-radius: 50px; box-shadow: 0 8px 25px var(--primary-glow);">
+        <i class="bi bi-box-arrow-in-right me-2"></i> Ingresar al Portal del Paciente
+      </button>
+    </div>
+    
+    <div class="row g-4 mt-2">
+      <div class="col-md-4">
+        <div class="card-panel h-100 text-center" style="padding: 2.5rem 1.5rem; border-top: 4px solid var(--primary); transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+          <i class="bi bi-calendar-check text-primary mb-3" style="font-size: 2.5rem;"></i>
+          <h5 class="fw-700" style="color: var(--primary-dark);">Agenda fácil</h5>
+          <p class="text-muted text-sm mb-0">Selecciona el especialista y horario que mejor se adapte a ti.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-panel h-100 text-center" style="padding: 2.5rem 1.5rem; border-top: 4px solid var(--accent); transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+          <i class="bi bi-clock-history mb-3" style="font-size: 2.5rem; color: var(--accent);"></i>
+          <h5 class="fw-700" style="color: var(--primary-dark);">Disponibilidad 24/7</h5>
+          <p class="text-muted text-sm mb-0">Gestiona tus citas médicas en cualquier momento, desde cualquier lugar.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-panel h-100 text-center" style="padding: 2.5rem 1.5rem; border-top: 4px solid var(--success); transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+          <i class="bi bi-shield-check text-success mb-3" style="font-size: 2.5rem;"></i>
+          <h5 class="fw-700" style="color: var(--primary-dark);">Información Segura</h5>
+          <p class="text-muted text-sm mb-0">Tus datos personales y clínicos están protegidos bajo los más altos estándares.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH PAGE -->
+  <div class="auth-page section-page" id="authPage">
+    <div class="auth-bg-pattern"></div>
+    <div class="auth-bg-icons">
+      <span><i class="bi bi-heart-pulse"></i></span>
+      <span><i class="bi bi-clipboard2-pulse"></i></span>
+      <span><i class="bi bi-hospital"></i></span>
+      <span><i class="bi bi-capsule"></i></span>
+      <span><i class="bi bi-activity"></i></span>
+      <span><i class="bi bi-bandaid"></i></span>
+    </div>
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+        <h3 id="authTitle">Iniciar Sesión</h3>
+        <p id="authSubtitle">Accede a tu panel de citas médicas</p>
+      </div>
+      <div class="auth-body">
+        <div id="authAlert" class="alert d-none"></div>
+        <form id="authForm" onsubmit="return handleAuth(event)">
+          <div class="mb-3" id="nameGroup" style="display:none">
+            <label class="form-label">Nombre completo</label>
+            <input type="text" class="form-control" id="regName" placeholder="Ej: Juan Pérez García">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Correo electrónico</label>
+            <input type="email" class="form-control" id="authEmail" placeholder="tu@correo.com" required>
+          </div>
+          <div class="mb-3" id="docGroup" style="display:none">
+            <label class="form-label">Documento de identidad</label>
+            <input type="text" class="form-control" id="regDoc" placeholder="CC, TI, CE...">
+          </div>
+          <div class="mb-3" id="phoneGroup" style="display:none">
+            <label class="form-label">Teléfono</label>
+            <input type="text" class="form-control" id="regPhone" placeholder="3001234567">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input type="password" class="form-control" id="authPassword" placeholder="••••••••" required>
+          </div>
+          <div class="mb-4" id="confirmGroup" style="display:none">
+            <label class="form-label">Confirmar contraseña</label>
+            <input type="password" class="form-control" id="regConfirm" placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2" id="authBtn">
+            <i class="bi bi-box-arrow-in-right"></i> Ingresar
+          </button>
+        </form>
+      </div>
+      <div class="auth-footer">
+        <span id="authToggle">¿No tienes cuenta? <a onclick="toggleAuth()">Regístrate gratis</a></span>
+        <br><a onclick="showForgotPassword()" style="margin-top:.3rem;display:inline-block">
+          <i class="bi bi-key me-1"></i>Olvidé mi contraseña
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORGOT PAGE -->
+  <div class="auth-page section-page" id="forgotPage">
+    <div class="auth-bg-pattern"></div>
+    <div class="auth-card">
+      <div class="auth-header" style="background:linear-gradient(145deg,#7c3aed,#1a6cf6)">
+        <div class="auth-icon"><i class="bi bi-shield-lock-fill"></i></div>
+        <h3>Recuperar Contraseña</h3>
+        <p>Te enviaremos instrucciones por correo</p>
+      </div>
+      <div class="auth-body">
+        <div id="forgotAlert" class="alert d-none"></div>
+        <form id="forgotForm" onsubmit="return handleForgotPassword(event)">
+          <div class="mb-4">
+            <label class="form-label">Correo electrónico</label>
+            <input type="email" class="form-control" id="forgotEmail" placeholder="tu@correo.com" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2">
+            <i class="bi bi-send"></i> Enviar instrucciones
+          </button>
+        </form>
+        <form id="resetForm" style="display:none" onsubmit="return handleResetPassword(event)">
+          <div class="mb-3">
+            <label class="form-label">Token de recuperación</label>
+            <input type="text" class="form-control" id="resetToken" placeholder="Pega el token aquí" required>
+            <div class="form-text"><i class="bi bi-info-circle me-1"></i>Revisa tu correo o la consola del servidor</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nueva contraseña</label>
+            <input type="password" class="form-control" id="resetPassword" placeholder="Mín. 8 caracteres, 1 mayúscula, 1 número, 1 especial" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Confirmar contraseña</label>
+            <input type="password" class="form-control" id="resetConfirm" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100 py-2">
+            <i class="bi bi-check-lg"></i> Restablecer contraseña
+          </button>
+        </form>
+      </div>
+      <div class="auth-footer">
+        <a onclick="showLogin()"><i class="bi bi-arrow-left me-1"></i>Volver al inicio de sesión</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PAGES (injected by JS) -->
+  <div id="dashboardPages"></div>
+
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="confirmModalLabel">Confirmar</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="confirmModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-sm btn-primary" id="confirmModalBtn">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api/';
+let TOKEN = localStorage.getItem('token') || null;
+let USER = null;
+let currentSection = null;
+
+// ─── TOAST ───
+function showToast(msg, type = 'info') {
+  const icons = { info: 'bi-info-circle', success: 'bi-check-circle-fill', error: 'bi-exclamation-circle-fill', warning: 'bi-exclamation-triangle-fill' };
+  const container = document.getElementById('toastContainer');
+  const id = 't' + Date.now();
+  const typeClass = type === 'error' ? 'toast-error' : `toast-${type}`;
+  container.innerHTML += `<div id="${id}" class="toast align-items-center border-0 fade ${typeClass}" role="alert">
+    <div class="toast-body">
+      <i class="bi ${icons[type]||icons.info} me-1" style="font-size:1rem"></i>
+      <span class="flex-grow-1">${msg}</span>
+      <button type="button" class="btn-close btn-close-sm ms-2" data-bs-dismiss="toast"></button>
+    </div>
+  </div>`;
+  const el = document.getElementById(id);
+  const bsToast = new bootstrap.Toast(el, { delay: 4000 });
+  bsToast.show();
+  el.addEventListener('hidden.bs.toast', () => el.remove());
+}
+
+function showAlert(el, msg, type) {
+  el.className = `alert alert-${type === 'error' ? 'danger' : type}`;
+  el.innerHTML = `<i class="bi ${type === 'error' ? 'bi-exclamation-circle' : type === 'success' ? 'bi-check-circle' : 'bi-info-circle'} me-1"></i>${msg}`;
+  el.classList.remove('d-none');
+}
+
+function hideAlert(el) { el.classList.add('d-none'); }
+
+// ─── API ───
+async function apiFetch(url, options = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (TOKEN) headers['Authorization'] = `Bearer ${TOKEN}`;
+  try {
+    const res = await fetch(API + url, { ...options, headers });
+    if (res.status === 401) { showToast('Sesión expirada', 'warning'); logout(); return null; }
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+  } catch (e) {
+    showToast('Error de conexión con el servidor', 'error');
+    return null;
+  }
+}
+
+// ─── AUTH ───
+let isRegister = false;
+function toggleAuth() {
+  isRegister = !isRegister;
+  document.getElementById('authTitle').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+  document.getElementById('authSubtitle').textContent = isRegister ? 'Regístrate para agendar tus citas médicas' : 'Accede a tu panel de citas médicas';
+  const btn = document.getElementById('authBtn');
+  btn.innerHTML = isRegister ? '<i class="bi bi-person-plus"></i> Crear Cuenta' : '<i class="bi bi-box-arrow-in-right"></i> Ingresar';
+  ['nameGroup','docGroup','phoneGroup','confirmGroup'].forEach(g => {
+    const el = document.getElementById(g);
+    if (el) el.style.display = isRegister ? 'block' : 'none';
+  });
+  document.getElementById('authToggle').innerHTML = isRegister
+    ? '¿Ya tienes cuenta? <a onclick="toggleAuth()">Inicia sesión</a>'
+    : '¿No tienes cuenta? <a onclick="toggleAuth()">Regístrate gratis</a>';
+  hideAlert(document.getElementById('authAlert'));
+}
+
+async function handleAuth(e) {
+  e.preventDefault();
+  const alertEl = document.getElementById('authAlert');
+  hideAlert(alertEl);
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+
+  if (isRegister) {
+    const name = document.getElementById('regName').value.trim();
+    const doc = document.getElementById('regDoc').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const confirm = document.getElementById('regConfirm').value;
+    if (password !== confirm) { showAlert(alertEl, 'Las contraseñas no coinciden', 'error'); return false; }
+    const res = await apiFetch('auth/register/', {
+      method: 'POST',
+      body: JSON.stringify({ correo: email, password, nombre_completo: name, documento: doc, telefono: phone })
+    });
+    if (res && res.ok) { showAlert(alertEl, '¡Registro exitoso! Ahora puedes iniciar sesión.', 'success'); setTimeout(toggleAuth, 1500); }
+    else showAlert(alertEl, res?.data?.detail || res?.data?.password?.[0] || 'Error al registrarse', 'error');
+  } else {
+    const res = await apiFetch('auth/login/', { method: 'POST', body: JSON.stringify({ correo: email, password }) });
+    if (res && res.ok) {
+      TOKEN = res.data.access;
+      localStorage.setItem('token', TOKEN);
+      await loadUser();
+      showDashboard();
+      showToast(`¡Bienvenido, ${USER?.nombre_completo?.split(' ')[0] || 'usuario'}! 👋`, 'success');
+    } else showAlert(alertEl, res?.data?.detail || 'Credenciales inválidas', 'error');
+  }
+  return false;
+}
+
+function showLanding() {
+  document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
+  document.getElementById('landingPage').classList.add('active');
+  const navUser = document.getElementById('navUser');
+  navUser.classList.add('d-none');
+  navUser.style.display = 'none !important';
+}
+
+function showLogin() {
+  document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
+  document.getElementById('authPage').classList.add('active');
+  const navUser = document.getElementById('navUser');
+  navUser.classList.add('d-none');
+  navUser.style.display = 'none !important';
+  if (isRegister) toggleAuth();
+}
+
+function showForgotPassword() {
+  document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
+  document.getElementById('forgotPage').classList.add('active');
+  document.getElementById('forgotForm').style.display = 'block';
+  document.getElementById('resetForm').style.display = 'none';
+  hideAlert(document.getElementById('forgotAlert'));
+}
+
+async function handleForgotPassword(e) {
+  e.preventDefault();
+  const alertEl = document.getElementById('forgotAlert');
+  hideAlert(alertEl);
+  await apiFetch('auth/forgot-password/', {
+    method: 'POST', body: JSON.stringify({ correo: document.getElementById('forgotEmail').value })
+  });
+  showAlert(alertEl, 'Si el correo existe, recibirás instrucciones. Revisa tu bandeja de entrada.', 'success');
+  document.getElementById('forgotForm').style.display = 'none';
+  document.getElementById('resetForm').style.display = 'block';
+  return false;
+}
+
+async function handleResetPassword(e) {
+  e.preventDefault();
+  const alertEl = document.getElementById('forgotAlert');
+  hideAlert(alertEl);
+  const token = document.getElementById('resetToken').value;
+  const pass = document.getElementById('resetPassword').value;
+  const confirm = document.getElementById('resetConfirm').value;
+  if (pass !== confirm) { showAlert(alertEl, 'Las contraseñas no coinciden', 'error'); return false; }
+  const res = await apiFetch('auth/reset-password/', { method: 'POST', body: JSON.stringify({ token, password: pass }) });
+  if (res && res.ok) {
+    showAlert(alertEl, '¡Contraseña actualizada! Redirigiendo al login...', 'success');
+    document.getElementById('forgotForm').style.display = 'block';
+    document.getElementById('resetForm').style.display = 'none';
+    setTimeout(showLogin, 2000);
+  } else showAlert(alertEl, res?.data?.detail || 'Error al restablecer', 'error');
+  return false;
+}
+
+async function loadUser() {
+  if (!TOKEN) return;
+  try {
+    const payload = JSON.parse(atob(TOKEN.split('.')[1]));
+    const p = await apiFetch(`users/${payload.user_id}/`);
+    if (p && p.ok) {
+      USER = p.data;
+      const name = USER.nombre_completo || 'Usuario';
+      const role = USER.id_rol_nombre || '—';
+      const initial = name[0].toUpperCase();
+      document.getElementById('navName').textContent = name.split(' ')[0];
+      document.getElementById('navRole').textContent = role;
+      document.getElementById('navAvatar').textContent = initial;
+      // Sidebar user header
+      document.getElementById('sidebarAvatarLg').textContent = initial;
+      document.getElementById('sidebarUserName').textContent = name;
+      document.getElementById('sidebarUserRole').textContent = role;
+    }
+  } catch(e) { logout(); }
+}
+
+function logout() {
+  TOKEN = null; USER = null; currentSection = null;
+  localStorage.removeItem('token');
+  const navUser = document.getElementById('navUser');
+  navUser.classList.add('d-none');
+  navUser.style.cssText = '';
+  document.getElementById('sidebar').classList.remove('show');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+  showLanding();
+}
+
+async function checkSession() {
+  if (!TOKEN) return false;
+  try {
+    const payload = JSON.parse(atob(TOKEN.split('.')[1]));
+    if (payload.exp * 1000 < Date.now()) { showToast('Sesión expirada', 'warning'); logout(); return false; }
+    await loadUser();
+    return !!USER;
+  } catch { logout(); return false; }
+}
+
+// ─── SIDEBAR ───
+const sidebarConfig = {
+  paciente: [
+    { id: 'home',      label: 'Inicio',       icon: 'bi-house-door',     fn: 'renderHome' },
+    { id: 'mis-citas', label: 'Mis Citas',     icon: 'bi-calendar-check', fn: 'renderMisCitas' },
+    { id: 'agendar',   label: 'Agendar Cita',  icon: 'bi-plus-circle',    fn: 'renderAgendar' },
+    { id: 'perfil',    label: 'Mi Perfil',     icon: 'bi-person',         fn: 'renderPerfil' },
+  ],
+  medico: [
+    { id: 'home',           label: 'Inicio',          icon: 'bi-house-door',     fn: 'renderHome' },
+    { id: 'mis-horarios',   label: 'Mis Horarios',     icon: 'bi-clock',          fn: 'renderMisHorarios' },
+    { id: 'citas-recibidas',label: 'Citas Recibidas',  icon: 'bi-calendar2-week', fn: 'renderCitasRecibidas' },
+    { id: 'perfil',         label: 'Mi Perfil',        icon: 'bi-person',         fn: 'renderPerfil' },
+  ],
+  admin: [
+    { id: 'home',          label: 'Inicio',         icon: 'bi-house-door',    fn: 'renderHome' },
+    { id: 'usuarios',      label: 'Usuarios',        icon: 'bi-people',        fn: 'renderAdminUsuarios' },
+    { id: 'especialidades',label: 'Especialidades',  icon: 'bi-bookmark-star', fn: 'renderAdminEspecialidades' },
+    { id: 'reportes',      label: 'Reportes',        icon: 'bi-bar-chart',     fn: 'renderAdminReportes' },
+    { id: 'perfil',        label: 'Mi Perfil',       icon: 'bi-person',        fn: 'renderPerfil' },
+  ]
+};
+
+function buildSidebar() {
+  const role = USER?.id_rol_nombre;
+  const links = sidebarConfig[role] || [];
+  const container = document.getElementById('sidebarLinks');
+  container.innerHTML = links.map(l =>
+    `<a class="sidebar-link" href="#" data-section="${l.id}" onclick="navigateTo('${l.id}','${l.fn}');return false;">
+      <i class="bi ${l.icon}"></i>${l.label}
+    </a>`
+  ).join('');
+}
+
+function navigateTo(id, fn) {
+  document.querySelectorAll('#sidebarLinks .sidebar-link').forEach(l => l.classList.remove('active'));
+  document.querySelector(`#sidebarLinks [data-section="${id}"]`)?.classList.add('active');
+  closeSidebar();
+  currentSection = id;
+  if (window[fn]) window[fn]();
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('show');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+// ─── DASHBOARD ───
+function showDashboard() {
+  document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
+  const navUser = document.getElementById('navUser');
+  navUser.classList.remove('d-none');
+  navUser.style.cssText = 'display:flex !important';
+  buildSidebar();
+  const first = sidebarConfig[USER?.id_rol_nombre]?.[0];
+  if (first) navigateTo(first.id, first.fn);
+}
+
+// ─── HOME ───
+async function renderHome() {
+  const dp = document.getElementById('dashboardPages');
+  dp.innerHTML = `<div class="section-page active"><div id="homeContent">
+    <div class="loading-container"><div class="spinner-border"></div><span>Cargando datos...</span></div>
+  </div></div>`;
+  const el = document.getElementById('homeContent');
+  const role = USER?.id_rol_nombre;
+  const res = await apiFetch('citas/');
+  const citas = res?.ok ? res.data : [];
+  const pendientes  = citas.filter(c => (c.estado_nombre||'') === 'pendiente');
+  const realizadas  = citas.filter(c => (c.estado_nombre||'') === 'realizada');
+  const canceladas  = citas.filter(c => (c.estado_nombre||'') === 'cancelada');
+
+  el.innerHTML = `
+    <div class="page-header">
+      <h1 class="page-title"><i class="bi bi-speedometer2"></i>Panel de Control</h1>
+      <span style="font-size:.82rem;color:var(--text-muted)">Bienvenido, <strong>${USER?.nombre_completo?.split(' ')[0]}</strong></span>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-icon blue"><i class="bi bi-calendar-check-fill"></i></div>
+        <div class="stat-info"><div class="stat-number">${citas.length}</div><div class="stat-label">Total Citas</div></div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon orange"><i class="bi bi-hourglass-split"></i></div>
+        <div class="stat-info"><div class="stat-number">${pendientes.length}</div><div class="stat-label">Pendientes</div></div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon green"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="stat-info"><div class="stat-number">${realizadas.length}</div><div class="stat-label">Realizadas</div></div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon red"><i class="bi bi-x-circle-fill"></i></div>
+        <div class="stat-info"><div class="stat-number">${canceladas.length}</div><div class="stat-label">Canceladas</div></div>
+      </div>
+    </div>
+    <div class="card-panel">
+      <div class="card-panel-header">
+        <h2 class="card-panel-title"><i class="bi bi-calendar2-week"></i>${role === 'admin' ? 'Resumen del Sistema' : 'Próximas Citas Pendientes'}</h2>
+        ${role === 'paciente' ? `<button class="btn btn-primary btn-sm" onclick="navigateTo('agendar','renderAgendar')"><i class="bi bi-plus-lg"></i> Agendar</button>` : ''}
+      </div>
+      <div class="card-panel-body">
+        ${role === 'admin'
+          ? `<p style="color:var(--text-muted);margin:0">Usa el menú lateral para gestionar usuarios, especialidades y reportes del sistema.</p>`
+          : renderCitasCards(pendientes)
+        }
+      </div>
+    </div>`;
+}
+
+function renderCitasCards(citas) {
+  if (!citas.length) return `<div class="empty-state">
+    <div class="empty-state-icon"><i class="bi bi-calendar-plus"></i></div>
+    <p>No hay citas pendientes próximamente</p>
+  </div>`;
+  return citas.slice(0,5).map(c => {
+    const f  = c.id_horario?.fecha || '—';
+    const hi = c.id_horario?.hora_inicio?.slice(0,5) || '—';
+    const est = c.estado_nombre || 'pendiente';
+    return `<div class="cita-card">
+      <div class="cita-time-block"><div class="time">${hi}</div><div class="date">${f}</div></div>
+      <div class="cita-info">
+        <div class="cita-medico">${c.medico_nombre ? 'Dr. ' + c.medico_nombre : c.paciente_nombre || '—'}</div>
+        <div class="cita-detail">${c.motivo ? c.motivo.substring(0,45) + (c.motivo.length > 45 ? '…' : '') : 'Sin motivo registrado'}</div>
+      </div>
+      <span class="badge badge-estado bg-${est}">${est}</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── PERFIL ───
+function renderPerfil() {
+  const dp = document.getElementById('dashboardPages');
+  dp.innerHTML = `<div class="section-page active">
+    <div class="page-header"><h1 class="page-title"><i class="bi bi-person-circle"></i>Mi Perfil</h1></div>
+    <div class="card-panel" style="max-width:600px">
+      <div class="card-panel-header">
+        <h2 class="card-panel-title"><i class="bi bi-pencil-square"></i>Editar información</h2>
+      </div>
+      <div class="card-panel-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre completo</label>
+            <input class="form-control" id="pfName" value="${USER?.nombre_completo||''}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Correo electrónico</label>
+            <input class="form-control" value="${USER?.correo||''}" disabled style="background:#f8faff">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Documento</label>
+            <input class="form-control" value="${USER?.documento||''}" disabled style="background:#f8faff">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Teléfono</label>
+            <input class="form-control" id="pfPhone" value="${USER?.telefono||''}">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Rol</label>
+            <div><span class="role-pill ${USER?.id_rol_nombre||''}"><i class="bi bi-person-badge me-1"></i>${USER?.id_rol_nombre||'—'}</span></div>
+          </div>
+        </div>
+        <hr style="margin:1.25rem 0;border-color:var(--border)">
+        <button class="btn btn-primary" onclick="actualizarPerfil()">
+          <i class="bi bi-check-lg"></i> Guardar cambios
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function actualizarPerfil() {
+  const name  = document.getElementById('pfName').value;
+  const phone = document.getElementById('pfPhone').value;
+  const res = await apiFetch(`users/${USER.id_usuario}/`, { method: 'PUT', body: JSON.stringify({ nombre_completo: name, telefono: phone }) });
+  if (res && res.ok) {
+    USER = { ...USER, ...res.data };
+    document.getElementById('navName').textContent = (USER.nombre_completo || 'Usuario').split(' ')[0];
+    document.getElementById('sidebarUserName').textContent = USER.nombre_completo || 'Usuario';
+    showToast('Perfil actualizado correctamente', 'success');
+  } else showToast('Error al actualizar perfil', 'error');
+}
+
+// ─── PACIENTE: Mis Citas ───
+async function renderMisCitas() {
+  const dp = document.getElementById('dashboardPages');
+  dp.innerHTML = `<div class="section-page active"><div id="mcContent">
+    <div class="loading-container"><div class="spinner-border"></div><span>Cargando tus citas...</span></div>
+  </div></div>`;
+  const res = await apiFetch('citas/');
+  if (!res || !res.ok) {
+    document.getElementById('mcContent').innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-circle me-1"></i>Error al cargar citas</div>';
+    return;
+  }
+  const citas = res.data;
+  document.getElementById('mcContent').innerHTML = `
+    <div class="page-header">
+      <h1 class="page-title"><i class="bi bi-calendar-check"></i>Mis Citas</h1>
+      <div class="d-flex gap-2 align-items-center">
+        <label class="form-label mb-0" style="white-space:nowrap">Filtrar:</label>
+        <select class="form-select form-select-sm" id="filtroEstado" onchange="filtrarCitas()" style="width:auto">
+          <option value="">Todas</option>
+          <option value="pendiente">Pendientes</option>
+          <option value="realizada">Realizadas</option>
+          <option value="cancelada">Canceladas</option>
+          <option value="no_asistio">No asistió</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr>
+            <th>Fecha</th><th>Hora</th><th>Médico</th><th>Estado</th><th>Motivo</th><th class="text-center">Acción</th>
+          </tr></thead>
+          <tbody id="citasTableBody">${buildCitasRows(citas)}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function buildCitasRows(citas) {
+  if (!citas.length) return `<tr><td colspan="6">
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
+      <p>No hay citas registradas</p>
+    </div>
+  </td></tr>`;
+  return citas.map(c => {
+    const f   = c.id_horario?.fecha || '—';
+    const hi  = c.id_horario?.hora_inicio?.slice(0,5) || '—';
+    const hf  = c.id_horario?.hora_fin?.slice(0,5) || '—';
+    const est = c.estado_nombre || c.id_estado?.nombre || 'pendiente';
+    return `<tr>
+      <td><strong>${f}</strong></td>
+      <td>${hi} – ${hf}</td>
+      <td>${c.medico_nombre ? 'Dr. ' + c.medico_nombre : '—'}</td>
+      <td><span class="badge badge-estado bg-${est}">${est}</span></td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted)">${c.motivo || '—'}</td>
+      <td class="text-center">${est === 'pendiente'
+        ? `<button class="btn btn-outline-danger btn-sm" onclick="confirmCancelarCita(${c.id_cita})"><i class="bi bi-x-circle"></i></button>`
+        : '<span style="color:var(--muted)">—</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function filtrarCitas() {
+  const estado = document.getElementById('filtroEstado').value;
+  const res = await apiFetch('citas/');
+  if (res && res.ok) {
+    let citas = res.data;
+    if (estado) citas = citas.filter(c => (c.estado_nombre || c.id_estado?.nombre) === estado);
+    document.getElementById('citasTableBody').innerHTML = buildCitasRows(citas);
+  }
+}
+
+let cancelCitaId = null;
+function confirmCancelarCita(id) {
+  cancelCitaId = id;
+  const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+  document.getElementById('confirmModalLabel').textContent = 'Cancelar Cita';
+  document.getElementById('confirmModalBody').innerHTML = `
+    <div style="text-align:center;padding:.5rem 0">
+      <div style="width:52px;height:52px;background:var(--danger-light);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:1.4rem;color:var(--danger)">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <p class="mb-1" style="font-weight:700">¿Cancelar esta cita?</p>
+      <p style="font-size:.82rem;color:var(--text-muted);margin:0">Esta acción no se puede deshacer.</p>
+    </div>`;
+  const btn = document.getElementById('confirmModalBtn');
+  btn.className = 'btn btn-sm btn-danger';
+  btn.innerHTML = '<i class="bi bi-x-circle me-1"></i>Sí, cancelar';
+  btn.onclick = async () => {
+    const res = await apiFetch(`citas/${cancelCitaId}/cancelar/`, { method: 'PUT' });
+    modal.hide();
+    if (res && res.ok) { showToast('Cita cancelada correctamente', 'success'); renderMisCitas(); }
+    else showToast(res?.data?.detail || 'Error al cancelar', 'error');
+  };
+  modal.show();
+}
+
+// ─── PACIENTE: Agendar ───
+let agStep = 1;
+let agData = { especialidad: null, medico: null, horario: null, motivo: '' };
+
+async function renderAgendar() {
+  agStep = 1; agData = { especialidad: null, medico: null, horario: null, motivo: '' };
+  const dp = document.getElementById('dashboardPages');
+  dp.innerHTML = `<div class="section-page active">
+    <div class="page-header"><h1 class="page-title"><i class="bi bi-plus-circle"></i>Agendar Cita</h1></div>
+    <div class="card-panel">
+      <div class="card-panel-header">
+        <div class="wizard-indicator" id="wizardSteps">
+          <div class="wizard-step-item">
+            <div class="wizard-step-btn active" id="ws1"><span class="step-number">1</span><span class="d-none d-sm-inline">Especialidad</span></div>
+          </div>
+          <div class="wizard-connector" id="wc1"></div>
+          <div class="wizard-step-item">
+            <div class="wizard-step-btn" id="ws2"><span class="step-number">2</span><span class="d-none d-sm-inline">Médico</span></div>
+          </div>
+          <div class="wizard-connector" id="wc2"></div>
+          <div class="wizard-step-item">
+            <div class="wizard-step-btn" id="ws3"><span class="step-number">3</span><span class="d-none d-sm-inline">Horario</span></div>
+          </div>
+          <div class="wizard-connector" id="wc3"></div>
+          <div class="wizard-step-item">
+            <div class="wizard-step-btn" id="ws4"><span class="step-number">4</span><span class="d-none d-sm-inline">Confirmar</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-panel-body">
+        <div id="agendarAlert" class="alert d-none"></div>
+        <div id="agStep1" class="wizard-step active"></div>
+        <div id="agStep2" class="wizard-step"></div>
+        <div id="agStep3" class="wizard-step"></div>
+        <div id="agStep4" class="wizard-step"></div>
+      </div>
+    </div>
+  </div>`;
+  await loadAgPaso1();
+}
+
+function updateWizard(step) {
+  for (let i = 1; i <= 4; i++) {
+    const s  = document.getElementById('ws' + i);
+    const wc = document.getElementById('wc' + i);
+    s.className = 'wizard-step-btn' + (i < step ? ' completed' : '') + (i === step ? ' active' : '');
+    if (i < step) s.querySelector('.step-number').innerHTML = '<i class="bi bi-check-lg"></i>';
+    else s.querySelector('.step-number').textContent = i;
+    if (wc) wc.className = 'wizard-connector' + (i < step ? ' done' : '');
+  }
+  for (let i = 1; i <= 4; i++) document.getElementById('agStep' + i).className = 'wizard-step' + (i === step ? ' active' : '');
+}
+
+async function loadAgPaso1() {
+  updateWizard(1);
+  const res = await apiFetch('especialidades/');
+  const esp = res?.ok ? res.data : [];
+  document.getElementById('agStep1').innerHTML = `
+    <p style="color:var(--text-muted);margin-bottom:1rem;font-size:.88rem">Selecciona la especialidad médica que necesitas:</p>
+    <div class="row g-2">${esp.map(e =>
+      `<div class="col-6 col-md-4 col-lg-3">
+        <div class="esp-card" onclick="agSeleccionarEspecialidad(${e.id_especialidad},'${e.nombre}')">
+          <i class="bi bi-hospital"></i>
+          <span>${e.nombre}</span>
+        </div>
+      </div>`).join('') || '<div class="col-12"><div class="empty-state"><div class="empty-state-icon"><i class="bi bi-hospital"></i></div><p>No hay especialidades disponibles</p></div></div>'
+    }</div>`;
+}
+
+function agSeleccionarEspecialidad(id, nombre) {
+  agData.especialidad = id;
+  showToast(`Especialidad: ${nombre}`, 'info');
+  loadAgPaso2();
+}
+
+async function loadAgPaso2() {
+  updateWizard(2);
+  const res = await apiFetch('medicos/');
+  const medicos = res?.ok ? res.data : [];
+  document.getElementById('agStep2').innerHTML = `
+    <p style="color:var(--text-muted);margin-bottom:1rem;font-size:.88rem">Selecciona el médico de tu preferencia:</p>
+    <div class="row g-2">${medicos.map(m =>
+      `<div class="col-12 col-md-6">
+        <div class="doctor-card" onclick="agSeleccionarMedico(${m.id_medico})">
+          <div class="doctor-avatar">${(m.usuario_info?.nombre || 'D')[0].toUpperCase()}</div>
+          <div>
+            <div class="doctor-name">Dr. ${m.usuario_info?.nombre || '—'}</div>
+            <div class="doctor-info">${m.consultorio ? '📍 ' + m.consultorio : '&nbsp;'}</div>
+          </div>
+        </div>
+      </div>`).join('') || '<div class="col-12"><div class="empty-state"><div class="empty-state-icon"><i class="bi bi-person-x"></i></div><p>No hay médicos disponibles</p></div></div>'
+    }</div>
+    <div class="mt-3"><button class="btn btn-outline-secondary btn-sm" onclick="loadAgPaso1()"><i class="bi bi-arrow-left me-1"></i>Atrás</button></div>`;
+}
+
+function agSeleccionarMedico(id) {
+  agData.medico = id;
+  loadAgPaso3();
+}
+
+async function loadAgPaso3() {
+  updateWizard(3);
+  const res = await apiFetch(`medicos/${agData.medico}/disponibilidad/`);
+  const horarios = res?.ok ? res.data : [];
+  document.getElementById('agStep3').innerHTML = `
+    <p style="color:var(--text-muted);margin-bottom:1rem;font-size:.88rem">Selecciona un horario disponible:</p>
+    <div class="row g-2">${horarios.map(h =>
+      `<div class="col-4 col-sm-3 col-md-2">
+        <div class="slot-btn" onclick="agSeleccionarHorario(${h.id_horario},'${h.fecha}','${h.hora_inicio?.slice(0,5)}','${h.hora_fin?.slice(0,5)}')">
+          <div class="time">${h.hora_inicio?.slice(0,5)}</div>
+          <div class="ampm">${h.fecha}</div>
+        </div>
+      </div>`).join('') || '<div class="col-12"><div class="empty-state"><div class="empty-state-icon"><i class="bi bi-calendar-x"></i></div><p>Sin horarios disponibles para este médico</p></div></div>'
+    }</div>
+    <div class="mt-3"><button class="btn btn-outline-secondary btn-sm" onclick="loadAgPaso2()"><i class="bi bi-arrow-left me-1"></i>Atrás</button></div>`;
+}
+
+function agSeleccionarHorario(id, fecha, inicio, fin) {
+  agData.horario = { id, fecha, inicio, fin };
+  loadAgPaso4();
+}
+
+function loadAgPaso4() {
+  updateWizard(4);
+  document.getElementById('agStep4').innerHTML = `
+    <p style="color:var(--text-muted);margin-bottom:1.25rem;font-size:.88rem">Confirma los detalles de tu cita:</p>
+    <div class="card-panel" style="margin-bottom:1.25rem">
+      <div class="card-panel-body" style="padding:1rem">
+        <div class="confirm-row">
+          <div class="confirm-icon"><i class="bi bi-calendar3"></i></div>
+          <div><div class="confirm-label">Fecha</div><div class="confirm-value">${agData.horario.fecha}</div></div>
+        </div>
+        <div class="confirm-row">
+          <div class="confirm-icon"><i class="bi bi-clock"></i></div>
+          <div><div class="confirm-label">Hora</div><div class="confirm-value">${agData.horario.inicio} – ${agData.horario.fin}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="mb-4">
+      <label class="form-label">Motivo de la consulta <span style="color:var(--muted);font-weight:400;text-transform:none">(opcional)</span></label>
+      <textarea class="form-control" id="agMotivo" rows="2" placeholder="Describe brevemente el motivo de tu visita..."></textarea>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary" onclick="loadAgPaso3()"><i class="bi bi-arrow-left me-1"></i>Atrás</button>
+      <button class="btn btn-primary flex-grow-1" onclick="confirmarCita()">
+        <i class="bi bi-check-lg me-1"></i>Confirmar y Agendar
+      </button>
+    </div>`;
+}
+
+async function confirmarCita() {
+  const motivo = document.getElementById('agMotivo')?.value || '';
+  const res = await apiFetch('citas/', {
+    method: 'POST',
+    body: JSON.stringify({ id_horario: agData.horario.id, motivo })
+  });
+  if (res && res.ok) {
+    showToast('¡Cita agendada exitosamente! 🎉', 'success');
+    setTimeout(renderMisCitas, 500);
+  } else showToast(res?.data?.detail || 'Error al agendar la cita', 'error');
+}
+
+// ─── MEDICO: Horarios ───
+async function renderMisHorarios() {
+  const dp = document.getElementById('dashboardPages');
+  const medId = USER?.id_usuario;
+  const res = await apiFetch(`medicos/${medId}/disponibilidad/`);
+  const horarios = res?.ok ? res.data : [];
+  dp.innerHTML = `<div class="section-page active">
+    <div class="page-header"><h1 class="page-title"><i class="bi bi-clock"></i>Mis Horarios</h1></div>
+    <div class="row g-3">
+      <div class="col-lg-5">
+        <div class="card-panel">
+          <div class="card-panel-header">
+            <h2 class="card-panel-title"><i class="bi bi-plus-circle"></i>Agregar Disponibilidad</h2>
+          </div>
+          <div class="card-panel-body">
+            <form onsubmit="return crearSlots(event)">
+              <div class="mb-3">
+                <label class="form-label">Fecha</label>
+                <input type="date" class="form-control" id="slotFecha" required>
+              </div>
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label">Desde</label>
+                  <input type="time" class="form-control" id="slotInicio" required>
+                </div>
+                <div class="col-6">
+                  <label class="form-label">Hasta</label>
+                  <input type="time" class="form-control" id="slotFin" required>
+                </div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Duración por slot</label>
+                <select class="form-select" id="slotDuracion">
+                  <option value="30">30 minutos</option>
+                  <option value="20">20 minutos</option>
+                  <option value="15">15 minutos</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-success w-100">
+                <i class="bi bi-calendar-plus me-1"></i>Generar Slots
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="card-panel h-100">
+          <div class="card-panel-header">
+            <h2 class="card-panel-title"><i class="bi bi-grid-3x3"></i>Horarios Disponibles</h2>
+          </div>
+          <div class="card-panel-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead><tr><th>Fecha</th><th>Inicio</th><th>Fin</th><th>Estado</th></tr></thead>
+                <tbody>${horarios.map(h => `<tr>
+                  <td><strong>${h.fecha}</strong></td>
+                  <td>${h.hora_inicio?.slice(0,5)}</td>
+                  <td>${h.hora_fin?.slice(0,5)}</td>
+                  <td>${h.disponible
+                    ? '<span class="badge badge-estado" style="background:var(--success-light);color:#065f46">Disponible</span>'
+                    : '<span class="badge badge-estado" style="background:#f1f5f9;color:#475569">Ocupado</span>'}</td>
+                </tr>`).join('') || '<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon"><i class="bi bi-clock-history"></i></div><p>Sin horarios registrados</p></div></td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function crearSlots(e) {
+  e.preventDefault();
+  const medId = USER?.id_usuario;
+  const res = await apiFetch('horarios/crear-slots/', {
+    method: 'POST',
+    body: JSON.stringify({
+      id_medico: medId,
+      fecha:  document.getElementById('slotFecha').value,
+      hora_inicio: document.getElementById('slotInicio').value,
+      hora_fin: document.getElementById('slotFin').value,
+      duracion_minutos: parseInt(document.getElementById('slotDuracion').value)
+    })
+  });
+  if (res && res.ok) { showToast(`✅ ${res.data.slots_creados} slots creados exitosamente`, 'success'); renderMisHorarios(); }
+  else showToast(res?.data?.detail || 'Error al crear slots', 'error');
+  return false;
+}
+
+// ─── MEDICO: Citas Recibidas ───
+async function renderCitasRecibidas() {
+  const dp = document.getElementById('dashboardPages');
+  dp.innerHTML = `<div class="section-page active"><div id="crContent">
+    <div class="loading-container"><div class="spinner-border"></div><span>Cargando citas...</span></div>
+  </div></div>`;
+  const res = await apiFetch('citas/');
+  if (!res || !res.ok) { document.getElementById('crContent').innerHTML = '<div class="alert alert-danger">Error al cargar</div>'; return; }
+  const citas = res.data;
+  document.getElementById('crContent').innerHTML = `
+    <div class="page-header"><h1 class="page-title"><i class="bi bi-calendar2-week"></i>Citas Recibidas</h1></div>
+    <div class="table-wrapper">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr>
+            <th>Fecha</th><th>Hora</th><th>Paciente</th><th>Motivo</th><th>Estado</th><th class="text-center">Acción</th>
+          </tr></thead>
+          <tbody>${citas.map(c => {
+            const est = c.estado_nombre || c.id_estado?.nombre;
+            return `<tr>
+              <td><strong>${c.id_horario?.fecha || '—'}</strong></td>
+              <td>${c.id_horario?.hora_inicio?.slice(0,5) || '—'}</td>
+              <td>${c.paciente_nombre || '—'}</td>
+              <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted)">${c.motivo || '—'}</td>
+              <td><span class="badge badge-estado bg-${est}">${est}</span></td>
+              <td class="text-center">${est === 'pendiente'
+                ? `<div class="d-flex gap-1 justify-content-center">
+                    <button class="btn btn-outline-success btn-sm" onclick="marcarRealizada(${c.id_cita})" title="Marcar realizada"><i class="bi bi-check-lg"></i></button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="marcarNoAsistio(${c.id_cita})" title="No asistió"><i class="bi bi-person-x"></i></button>
+                   </div>`
+                : '<span style="color:var(--muted)">—</span>'}</td>
+            </tr>`;
+          }).join('') || '<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon"><i class="bi bi-inbox"></i></div><p>No hay citas recibidas</p></div></td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+async function marcarRealizada(id) {
+  const res = await apiFetch(`citas/${id}/realizada/`, { method: 'PUT' });
+  if (res && res.ok) { showToast('Cita marcada como realizada ✅', 'success'); renderCitasRecibidas(); }
+  else showToast(res?.data?.detail || 'Error', 'error');
+}
+
+async function marcarNoAsistio(id) {
+  const res = await apiFetch(`citas/${id}/no-asistio/`, { method: 'PUT' });
+  if (res && res.ok) { showToast('Cita marcada como no asistió', 'warning'); renderCitasRecibidas(); }
+  else showToast(res?.data?.detail || 'Error', 'error');
+}
+
+// ─── ADMIN: Usuarios ───
+async function renderAdminUsuarios() {
+  const dp = document.getElementById('dashboardPages');
+  dp.innerHTML = `<div class="section-page active"><div id="auContent">
+    <div class="loading-container"><div class="spinner-border"></div><span>Cargando usuarios...</span></div>
+  </div></div>`;
+  const res = await apiFetch('users/');
+  if (!res || !res.ok) { document.getElementById('auContent').innerHTML = '<div class="alert alert-danger">Error al cargar usuarios</div>'; return; }
+  const usuarios = res.data;
+  document.getElementById('auContent').innerHTML = `
+    <div class="page-header">
+      <h1 class="page-title"><i class="bi bi-people"></i>Gestión de Usuarios</h1>
+      <span style="font-size:.82rem;color:var(--text-muted)">${usuarios.length} usuarios registrados</span>
+    </div>
+    <div class="table-wrapper">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr>
+            <th>ID</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th class="text-center">Acción</th>
+          </tr></thead>
+          <tbody>${usuarios.map(u => {
+            const role = u.id_rol_nombre || '—';
+            const isActive = u.activo;
+            return `<tr>
+              <td style="color:var(--text-muted);font-size:.8rem">#${u.id_usuario}</td>
+              <td><strong>${u.nombre_completo || '—'}</strong></td>
+              <td style="color:var(--text-muted)">${u.correo}</td>
+              <td><span class="role-pill ${role}"><i class="bi bi-person-badge me-1"></i>${role}</span></td>
+              <td>
+                <span class="badge badge-estado" style="${isActive ? 'background:var(--success-light);color:#065f46' : 'background:var(--danger-light);color:#991b1b'}">
+                  ${isActive ? '● Activo' : '● Bloqueado'}
+                </span>
+              </td>
+              <td class="text-center">
+                <button class="btn btn-sm ${isActive ? 'btn-outline-danger' : 'btn-outline-success'}" onclick="toggleUsuario(${u.id_usuario})" title="${isActive ? 'Bloquear' : 'Activar'}">
+                  <i class="bi ${isActive ? 'bi-lock' : 'bi-unlock'}"></i>
+                </button>
+              </td>
+            </tr>`;
+          }).join('') || '<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon"><i class="bi bi-people"></i></div><p>No hay usuarios</p></div></td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+async function toggleUsuario(id) {
+  const res = await apiFetch(`admin/usuarios/${id}/bloquear/`, { method: 'PUT' });
+  if (res && res.ok) {
+    showToast(`Usuario ${res.data.activo ? 'activado' : 'bloqueado'} correctamente`, res.data.activo ? 'success' : 'warning');
+    renderAdminUsuarios();
+  } else showToast('Error al cambiar estado', 'error');
+}
+
+// ─── ADMIN: Especialidades ───
+async function renderAdminEspecialidades() {
+  const res = await apiFetch('especialidades/');
+  const especialidades = res?.ok ? res.data : [];
+  const dp = document.getElementById('dashboardPages');
+  dp.innerHTML = `<div class="section-page active">
+    <div class="page-header"><h1 class="page-title"><i class="bi bi-bookmark-star"></i>Especialidades</h1></div>
+    <div class="card-panel" style="max-width:600px">
+      <div class="card-panel-header">
+        <h2 class="card-panel-title"><i class="bi bi-plus-circle"></i>Nueva especialidad</h2>
+      </div>
+      <div class="card-panel-body">
+        <form onsubmit="return crearEspecialidad(event)" class="d-flex gap-2">
+          <input type="text" class="form-control" id="newEspName" placeholder="Ej: Cardiología, Neurología..." required>
+          <button class="btn btn-primary" type="submit" style="white-space:nowrap"><i class="bi bi-plus-lg"></i> Crear</button>
+        </form>
+        <hr style="margin:1.25rem 0;border-color:var(--border)">
+        <div class="table-wrapper">
+          <table class="table mb-0">
+            <thead><tr><th>ID</th><th>Especialidad</th><th class="text-center">Eliminar</th></tr></thead>
+            <tbody>${especialidades.map(e =>
+              `<tr>
+                <td style="color:var(--text-muted);font-size:.8rem">#${e.id_especialidad}</td>
+                <td><strong>${e.nombre}</strong></td>
+                <td class="text-center">
+                  <button class="btn btn-outline-danger btn-sm" onclick="eliminarEspecialidad(${e.id_especialidad})"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>`).join('') || '<tr><td colspan="3"><div class="empty-state" style="padding:1.5rem"><p>Sin especialidades registradas</p></div></td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function crearEspecialidad(e) {
+  e.preventDefault();
+  const name = document.getElementById('newEspName').value;
+  const res = await apiFetch('especialidades/', { method: 'POST', body: JSON.stringify({ nombre: name }) });
+  if (res && res.ok) { showToast('Especialidad creada exitosamente', 'success'); renderAdminEspecialidades(); }
+  else showToast(res?.data?.detail || 'Error al crear especialidad', 'error');
+  return false;
+}
+
+async function eliminarEspecialidad(id) {
+  const res = await apiFetch(`especialidades/${id}/`, { method: 'DELETE' });
+  if (res !== null) { showToast('Especialidad eliminada', 'success'); renderAdminEspecialidades(); }
+  else showToast('Error al eliminar', 'error');
+}
+
+// ─── ADMIN: Reportes ───
+let chartInstance = null;
+async function renderAdminReportes() {
+  const dp = document.getElementById('dashboardPages');
+  dp.innerHTML = `<div class="section-page active">
+    <div class="page-header"><h1 class="page-title"><i class="bi bi-bar-chart-line"></i>Reportes del Sistema</h1></div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="card-panel">
+          <div class="card-panel-header"><h2 class="card-panel-title"><i class="bi bi-funnel"></i>Tipo de reporte</h2></div>
+          <div class="card-panel-body">
+            <select class="form-select" id="tipoReporte" onchange="cargarReporte()">
+              <option value="cancelaciones">Cancelaciones</option>
+              <option value="no-asistencia-por-medico">No asistencia por médico</option>
+            </select>
+            <hr style="margin:1rem 0;border-color:var(--border)">
+            <div id="reporteResumen" style="font-size:.85rem;color:var(--text-muted)"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="card-panel">
+          <div class="card-panel-header"><h2 class="card-panel-title" id="reporteTitle"><i class="bi bi-pie-chart"></i>Cancelaciones</h2></div>
+          <div class="card-panel-body" style="display:flex;align-items:center;justify-content:center;min-height:260px">
+            <canvas id="reporteChart" style="max-height:250px"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  cargarReporte();
+}
+
+async function cargarReporte() {
+  const tipo = document.getElementById('tipoReporte').value;
+  const res = await apiFetch(`admin/reportes/?tipo=${tipo}`);
+  if (!res || !res.ok) return;
+  const data = res.data;
+  const titleEl = document.getElementById('reporteTitle');
+
+  if (tipo === 'cancelaciones') {
+    titleEl.innerHTML = '<i class="bi bi-pie-chart me-2"></i>Cancelaciones';
+    const total = data.total_general || 0;
+    const canceladas = data.total_canceladas || 0;
+    const otras = total - canceladas;
+    document.getElementById('reporteResumen').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:.5rem">
+        <div style="display:flex;justify-content:space-between"><span>Total citas</span><strong>${total}</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--danger)">Canceladas</span><strong>${canceladas} (${data.porcentaje||0}%)</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--success)">Otras</span><strong>${otras}</strong></div>
+      </div>`;
+    if (chartInstance) chartInstance.destroy();
+    const ctx = document.getElementById('reporteChart').getContext('2d');
+    chartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Canceladas', 'Otras'],
+        datasets: [{ data: [canceladas, otras], backgroundColor: ['#ef4444', '#10b981'], borderWidth: 0, hoverOffset: 8 }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 }, padding: 16 } }
+        },
+        cutout: '68%'
+      }
+    });
+  } else {
+    titleEl.innerHTML = '<i class="bi bi-bar-chart me-2"></i>No asistencia por médico';
+    const items = data.data || [];
+    document.getElementById('reporteResumen').innerHTML = items.length
+      ? items.map(i => `<div style="display:flex;justify-content:space-between;margin-bottom:.4rem"><span>${i.id_horario__id_medico__id_medico__nombre_completo || '—'}</span><strong>${i.total}</strong></div>`).join('')
+      : '<span>Sin datos para mostrar</span>';
+    if (chartInstance) chartInstance.destroy();
+    const ctx = document.getElementById('reporteChart').getContext('2d');
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: items.map(i => (i.id_horario__id_medico__id_medico__nombre_completo || '—').split(' ')[0]),
+        datasets: [{
+          label: 'No asistieron',
+          data: items.map(i => i.total),
+          backgroundColor: '#1a6cf6',
+          borderRadius: 8,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Inter' } }, grid: { color: '#f0f4ff' } },
+          x: { ticks: { font: { family: 'Inter' } }, grid: { display: false } }
+        }
+      }
+    });
+  }
+}
+
+// ─── SIDEBAR TOGGLE ───
+document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('show');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+});
+
+// ─── INIT ───
+(async function init() {
+  initTheme();
+  if (TOKEN) {
+    const valid = await checkSession();
+    if (valid) showDashboard();
+    else showLanding();
+  } else showLanding();
+})();
+
+// ─── THEME TOGGLE ───
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  updateThemeIcon(savedTheme);
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+  const icon = document.querySelector('#themeToggleBtn i');
+  if (icon) {
+    if (theme === 'dark') {
+      icon.className = 'bi bi-sun';
+    } else {
+      icon.className = 'bi bi-moon';
+    }
+  }
+}
+</script>
+</body>
+</html>

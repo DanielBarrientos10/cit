@@ -19,14 +19,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
-    'drf_spectacular',
+    'drf_yasg',
     'citas',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,8 +76,16 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 AUTH_USER_MODEL = 'citas.usuario'
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'USER_ID_FIELD': 'id_usuario',
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -84,11 +94,28 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Gestión de Citas API',
-    'DESCRIPTION': 'API para gestionar citas médicas',
-    'VERSION': '1.0.0',
+# ─── CORS ───────────────────────────────────────────────
+# Permite que el frontend (index.html servido en /static/)
+# llame a la API REST sin errores de navegador.
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# ─── SWAGGER (drf-yasg) ─────────────────────────────────
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'JWT token. Formato: Bearer <token>',
+        }
+    },
+    'USE_SESSION_AUTH': False,
+    'JSON_EDITOR': True,
+    'DEFAULT_INFO': 'gestion_citas.urls.api_info',
 }
