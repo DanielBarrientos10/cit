@@ -1,0 +1,8 @@
+node_modules
+package.json
+package-lock.json
+pnpm-lock.yaml
+.kilo
+bun.lock
+yarn.lock
+agent-manager.json
