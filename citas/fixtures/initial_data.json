@@ -18,5 +18,22 @@
   {"model": "citas.especialidades", "pk": 7, "fields": {"nombre": "Oftalmología"}},
   {"model": "citas.especialidades", "pk": 8, "fields": {"nombre": "Psiquiatría"}},
   {"model": "citas.especialidades", "pk": 9, "fields": {"nombre": "Medicina General"}},
-  {"model": "citas.especialidades", "pk": 10, "fields": {"nombre": "Odontología"}}
+  {"model": "citas.especialidades", "pk": 10, "fields": {"nombre": "Odontología"}},
+
+  {
+    "model": "citas.usuario",
+    "pk": 1,
+    "fields": {
+      "correo": "admin@medicita.com",
+      "nombre_completo": "Administrador MediCita",
+      "documento": "000000001",
+      "telefono": "3000000000",
+      "id_rol": 1,
+      "activo": true,
+      "intentos_fallidos": 0,
+      "bloqueado_hasta": null,
+      "password": "pbkdf2_sha256$1200000$k7TKqW30hlKS08gd9h7OYS$ZQuzGPEP/E8l/XZJS/UE18RKg6b2QuuwBYiLAIFWTNY=",
+      "last_login": null
+    }
+  }
 ]

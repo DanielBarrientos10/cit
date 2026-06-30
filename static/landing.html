@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediCita — Gestión de Citas Médicas</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="description" content="Sistema profesional de gestión de citas médicas online. Agenda, consulta y cancela tus citas con especialistas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-brand" href="landing.html">
+    <div class="brand-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+    <div>
+      Portal HUN
+      <span class="brand-sub">Agenda tu cita</span>
+    </div>
+  </a>
+  <div class="navbar-spacer"></div>
+  <div class="navbar-actions">
+    <a class="btn-nav" href="login.html">
+      <i class="bi bi-box-arrow-in-right"></i> Ingresar
+    </a>
+    <a class="btn-nav" href="login.html?mode=register">
+      <i class="bi bi-person-plus"></i> Registrarse
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-section" style="margin:80px 1.5rem 0;max-width:1060px;margin-left:auto;margin-right:auto;margin-top:80px;animation:fadeIn 0.4s ease;">
+  <i class="bi bi-heart-pulse hero-icon-float"></i>
+  <i class="bi bi-clipboard2-pulse hero-icon-float"></i>
+  <i class="bi bi-hospital hero-icon-float"></i>
+  <i class="bi bi-capsule hero-icon-float"></i>
+  <i class="bi bi-activity hero-icon-float"></i>
+  <i class="bi bi-bandaid hero-icon-float"></i>
+
+  <div class="hero-badge">
+    <i class="bi bi-shield-check"></i> Sistema certificado de salud digital
+  </div>
+
+  <h1 class="hero-title">
+    Agenda tu cita médica<br>de forma <span>rápida y segura</span>
+  </h1>
+
+  <p class="hero-subtitle">
+    Conéctate con los mejores especialistas. Gestiona tus citas médicas en tiempo real, cancela, reprograma y accede a tu historial clínico desde cualquier lugar.
+  </p>
+
+  <div class="hero-actions">
+    <a class="btn-hero-primary" href="login.html">
+      <i class="bi bi-box-arrow-in-right"></i> Ingresar al Portal
+    </a>
+    <a class="btn-hero-ghost" href="login.html?mode=register">
+      <i class="bi bi-person-plus"></i> Crear cuenta gratis
+    </a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-number">10+</div>
+      <div class="hero-stat-label">Especialidades</div>
+    </div>
+    <div class="hero-stat" style="border-left:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2);padding:0 2.5rem;">
+      <div class="hero-stat-number">24/7</div>
+      <div class="hero-stat-label">Disponibilidad</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-number">100%</div>
+      <div class="hero-stat-label">Seguro</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMO FUNCIONA -->
+<div style="max-width:1060px;margin:3rem auto;padding:0 1.5rem;">
+  <div class="how-section">
+    <div class="section-heading">
+      <div class="section-label-pill"><i class="bi bi-lightbulb"></i> Proceso simple</div>
+      <h2>¿Cómo funciona?</h2>
+      <p>En 4 pasos, agenda tu cita con el especialista que necesitas</p>
+    </div>
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <div class="how-step-card">
+          <div class="how-step-number">1</div>
+          <i class="bi bi-person-plus how-step-icon"></i>
+          <div class="how-step-title">Regístrate</div>
+          <p class="how-step-desc">Crea tu cuenta gratuita con tu correo y datos personales en menos de 2 minutos.</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="how-step-card">
+          <div class="how-step-number">2</div>
+          <i class="bi bi-search how-step-icon"></i>
+          <div class="how-step-title">Elige especialidad</div>
+          <p class="how-step-desc">Selecciona la especialidad médica que necesitas y el médico de tu preferencia.</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="how-step-card">
+          <div class="how-step-number">3</div>
+          <i class="bi bi-clock how-step-icon"></i>
+          <div class="how-step-title">Selecciona horario</div>
+          <p class="how-step-desc">Elige entre los horarios disponibles del médico que mejor se adapten a tu agenda.</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="how-step-card">
+          <div class="how-step-number">4</div>
+          <i class="bi bi-check-circle how-step-icon"></i>
+          <div class="how-step-title">Confirma tu cita</div>
+          <p class="how-step-desc">Revisa los detalles, agrega el motivo de consulta y confirma. ¡Listo!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ESPECIALIDADES -->
+<div style="max-width:1060px;margin:0 auto 3rem;padding:0 1.5rem;">
+  <div class="section-heading">
+    <div class="section-label-pill"><i class="bi bi-hospital"></i> Oferta médica</div>
+    <h2>Nuestras especialidades</h2>
+    <p>Contamos con los mejores especialistas en diversas áreas de la medicina</p>
+  </div>
+  <div class="row g-3">
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="esp-showcase-card">
+        <div class="esp-showcase-icon"><i class="bi bi-heart-pulse"></i></div>
+        <div class="esp-showcase-name">Cardiología</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="esp-showcase-card">
+        <div class="esp-showcase-icon"><i class="bi bi-person"></i></div>
+        <div class="esp-showcase-name">Dermatología</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="esp-showcase-card">
+        <div class="esp-showcase-icon"><i class="bi bi-emoji-smile"></i></div>
+        <div class="esp-showcase-name">Pediatría</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="esp-showcase-card">
+        <div class="esp-showcase-icon"><i class="bi bi-brain"></i></div>
+        <div class="esp-showcase-name">Neurología</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="esp-showcase-card">
+        <div class="esp-showcase-icon"><i class="bi bi-bandaid"></i></div>
+        <div class="esp-showcase-name">Ortopedia</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="esp-showcase-card">
+        <div class="esp-showcase-icon"><i class="bi bi-gender-female"></i></div>
+        <div class="esp-showcase-name">Ginecología</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="esp-showcase-card">
+        <div class="esp-showcase-icon"><i class="bi bi-eye"></i></div>
+        <div class="esp-showcase-name">Oftalmología</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="esp-showcase-card">
+        <div class="esp-showcase-icon"><i class="bi bi-plus-circle"></i></div>
+        <div class="esp-showcase-name">Y más...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POR QUE ELEGIRNOS -->
+<div style="max-width:1060px;margin:0 auto 3rem;padding:0 1.5rem;">
+  <div class="section-heading">
+    <div class="section-label-pill"><i class="bi bi-star"></i> Beneficios</div>
+    <h2>¿Por qué elegirnos?</h2>
+    <p>Diseñado para hacer tu experiencia médica más fácil y eficiente</p>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card-panel h-100 text-center" style="padding:2rem 1.5rem;border-top:4px solid var(--primary);">
+        <i class="bi bi-calendar-check" style="font-size:2.2rem;color:var(--primary);display:block;margin-bottom:.75rem;"></i>
+        <h5 class="fw-700 mb-2" style="color:var(--primary-dark);">Agenda en 2 minutos</h5>
+        <p class="text-muted mb-0" style="font-size:.85rem;line-height:1.6;">Proceso simplificado con wizard de 4 pasos. Sin llamadas, sin esperas.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-panel h-100 text-center" style="padding:2rem 1.5rem;border-top:4px solid var(--warning);">
+        <i class="bi bi-bell" style="font-size:2.2rem;color:var(--warning);display:block;margin-bottom:.75rem;"></i>
+        <h5 class="fw-700 mb-2" style="color:var(--primary-dark);">Notificaciones en tiempo real</h5>
+        <p class="text-muted mb-0" style="font-size:.85rem;line-height:1.6;">Recibe notificaciones sobre tus citas, recordatorios y cambios importantes.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-panel h-100 text-center" style="padding:2rem 1.5rem;border-top:4px solid var(--success);">
+        <i class="bi bi-shield-check" style="font-size:2.2rem;color:var(--success);display:block;margin-bottom:.75rem;"></i>
+        <h5 class="fw-700 mb-2" style="color:var(--primary-dark);">Datos protegidos</h5>
+        <p class="text-muted mb-0" style="font-size:.85rem;line-height:1.6;">Autenticación JWT, cifrado bcrypt y control de acceso por rol garantizan tu privacidad.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div style="max-width:1060px;margin:0 auto;padding:0 1.5rem 2rem;">
+  <div class="landing-footer">
+    <div class="landing-footer-brand">
+      <i class="bi bi-hospital" style="font-size:1.3rem;"></i>
+      MediCita &mdash; Sistema de Gestión de Citas
+    </div>
+    <div class="landing-footer-links">
+      <a href="login.html"><i class="bi bi-box-arrow-in-right me-1"></i>Ingresar</a>
+      <a href="login.html?mode=register"><i class="bi bi-person-plus me-1"></i>Registrarse</a>
+    </div>
+    <div style="font-size:.75rem;color:rgba(255,255,255,.4);">
+      &copy; 2026 MediCita &mdash; Todos los derechos reservados
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

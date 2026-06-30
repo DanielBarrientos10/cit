@@ -37,5 +37,6 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
-    path('', RedirectView.as_view(url='/static/index.html', permanent=False)),
+    path('', RedirectView.as_view(url='/static/landing.html', permanent=False)),
+    path('dashboard/', RedirectView.as_view(url='/static/dashboard.html', permanent=False)),
 ]
