@@ -16,8 +16,8 @@ Registrar un nuevo paciente.
 - **Body:**
 ```json
 {
-  "correo": "paciente@email.com",
-  "password": "MiPassword1!",
+  "correo": "paciente@medicita.com",
+  "password": "Paciente123!",
   "nombre_completo": "Juan Pérez",
   "documento": "12345678",
   "telefono": "3001234567"
@@ -31,8 +31,8 @@ Iniciar sesión.
 - **Body:**
 ```json
 {
-  "correo": "paciente@email.com",
-  "password": "MiPassword1!"
+  "correo": "paciente@medicita.com",
+  "password": "Paciente123!"
 }
 ```
 - **Respuesta (200):** `{ "access": "<token>", "refresh": "<token>" }`
